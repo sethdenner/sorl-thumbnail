@@ -17,8 +17,8 @@ class EngineBase(object):
         image = self.cropbox(image, geometry, options)
         image = self.orientation(image, geometry, options)
         image = self.colorspace(image, geometry, options)
+        image = self.crop(image, options)
         image = self.scale(image, geometry, options)
-        image = self.crop(image, geometry, options)
         image = self.rounded(image, geometry, options)
         image = self.blur(image, geometry, options)
         image = self.padding(image, geometry, options)
@@ -53,32 +53,30 @@ class EngineBase(object):
         """
         Wrapper for ``_scale``
         """
-        crop = options['crop']
         upscale = options['upscale']
         x_image, y_image = map(float, self.get_image_size(image))
         # calculate scaling factor
         factors = (geometry[0] / x_image, geometry[1] / y_image)
-        factor = max(factors) if crop else min(factors)
+        factor = max(factors) if geometry[0] > geometry[1] else min(factors)
         if factor < 1 or upscale:
             width = toint(x_image * factor)
             height = toint(y_image * factor)
             image = self._scale(image, width, height)
         return image
 
-    def crop(self, image, geometry, options):
+    def crop(self, image, options):
         """
         Wrapper for ``_crop``
         """
         crop = options['crop']
         if not crop or crop == 'noop':
             return image
-        x_image, y_image = self.get_image_size(image)
-        if geometry[0] > x_image and geometry[1] > y_image:
-            return image
-        geometry = (min(x_image, geometry[0]), min(y_image, geometry[1]))
-        x_offset, y_offset = parse_crop(crop, (x_image, y_image), geometry)
-        return self._crop(image, geometry[0], geometry[1], x_offset, y_offset)
 
+        x_image, y_image = self.get_image_size(image)
+        left, top, width, height = parse_crop(crop, (x_image, y_image))
+        if left + width > x_image or top + height > y_image:
+            return image
+        return self._crop(image, width, height, left, top)
 
     def rounded(self, image, geometry, options):
         """
@@ -200,4 +198,3 @@ class EngineBase(object):
         called from :meth:`write`
         """
         raise NotImplemented()
-
