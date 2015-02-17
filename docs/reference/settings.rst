@@ -60,6 +60,19 @@ Features
 * More dependencies
 * Requires a little extra work to transfer data between environments
 
+Dbm
+---
+``sorl.thumbnail.kvstores.dbm_kvstore.KVStore``. A simple Key Value Store has no
+dependencies outside the standard Python library and uses the DBM modules to
+store the data.
+
+Features
+^^^^^^^^
+* No external dependencies, besides the standard library
+* No extra components required, e.g., database or cache
+* Specially indicated for local development environments
+
+
 ``THUMBNAIL_KEY_DBCOLUMN``
 ==========================
 
@@ -108,6 +121,17 @@ ImageMagick ``convert`` or  GraphicsMagic ``gm convert`` command. Features:
 * It is pretty fast
 * Can handle CMYK sources
 * It is a command line command, that is less than ideal,
+
+Wand
+----------------------------
+``'sorl.thumbnail.engines.wand_engine.Engine'``. This engine uses `Wand
+<http://wand-py.org>`_, a ctypes-based simple ImageMagick binding for Python. 
+Features:
+
+* Easy to install
+* Produces high quality images
+* Can handle CMYK sources
+* Works on Python 2.6, 2.7, 3.2, 3.3, and PyPy
 
 ``THUMBNAIL_CONVERT``
 =====================
@@ -167,14 +191,41 @@ The host for Redis server. Only applicable for the Redis Key Value Store
 The port for Redis server. Only applicable for the Redis Key Value Store
 
 
+``THUMBNAIL_DBM_FILE``
+======================
+
+- Default: ``thumbnail_kvstore``
+
+Filename of the DBM database. Depending on the DBM engine selected by your
+Python installation, this will be used as a prefix because multiple files may be
+created.
+
+
+``THUMBNAIL_DBM_MODE``
+======================
+
+- Default: ``0x644``
+
+Permission bits to use when creating new DBM files
+
+
 ``THUMBNAIL_CACHE_TIMEOUT``
 ===========================
 
 - Default: ``3600 * 24 * 365 * 10``
 
-Cache timeout for Cached DB Key Value Store. You should probably keep this at
-maximum or ``None`` if your caching backend can handle that as infinite.
+Cache timeout for Cached DB Key Value Store in seconds. You should probably keep this 
+at maximum or ``None`` if your caching backend can handle that as infinite.
 Only applicable for the Cached DB Key Value Store.
+
+
+``THUMBNAIL_CACHE``
+===================
+
+- Default: ``'default'``
+
+Cache configuration for Cached DB Key Value Store. Defaults to the ``'default'`` cache
+but some applications might have multiple cache clusters.
 
 
 ``THUMBNAIL_KEY_PREFIX``
@@ -200,6 +251,14 @@ The generated thumbnails filename prefix.
 
 Default image format, supported formats are: ``'JPEG'``, ``'PNG'``. This also implicitly
 sets the filename extension. This can be overridden by individual options.
+
+``THUMBNAIL_PRESERVE_FORMAT``
+=============================
+
+- Default: ``False``
+
+If ``True``, the format of the input file will be preserved. If ``False``,
+``THUMBNAIL_FORMAT`` will be used.
 
 
 ``THUMBNAIL_COLORSPACE``
@@ -238,6 +297,14 @@ Saves jpeg thumbnails as progressive jpegs. This can be overridden by individual
 options.
 
 
+``THUMBNAIL_ORIENTATION``
+=========================
+
+- Default: ``True``
+
+Orientate the thumbnail with respect to source EXIF orientation tag
+
+
 ``THUMBNAIL_DUMMY``
 ===================
 
@@ -272,3 +339,28 @@ This value sets an image ratio to all thumbnails that are not defined by width
 **and** height since we cannot determine from the file input (since we don't
 have that).
 
+``THUMBNAIL_ALTERNATIVE_RESOLUTIONS``
+=====================================
+
+- Default: ``[]``
+- Example: ``[1.5, 2]``
+
+This value enables creation of additional high-resolution ("Retina") thumbnails
+for every thumbnail. Resolution multiplicators, e.g. value 2 means for every thumbnail
+of regular size x\*y, additional thumbnail of 2x\*2y size is created.
+
+``THUMBNAIL_FILTER_WIDTH``
+==========================
+
+- Default: ``500``
+
+This value sets the width of thumbnails inserted when running filters one texts
+that regex replaces references to images with thumbnails.
+
+``THUMBNAIL_URL_TIMEOUT``
+=========================
+
+- Default: ``None``
+
+This value sets the timeout value in seconds when retrieving a source image from a URL. 
+If no timeout value is specified, it will wait indefinitely for a response.
