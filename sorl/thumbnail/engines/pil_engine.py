@@ -201,7 +201,7 @@ class Engine(EngineBase):
 
     def _get_raw_data(self, image, format_, quality, image_info=None, progressive=False):
         # Increase (but never decrease) PIL buffer size
-        ImageFile.MAXBLOCK = max(ImageFile.MAXBLOCK, image.size[0] * image.size[1])
+        ImageFile.MAXBLOCK = max(ImageFile.MAXBLOCK, max(image.size)**2)
         bf = BufferIO()
 
         params = {
